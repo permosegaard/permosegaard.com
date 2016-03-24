@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /libs/
+Disallow: /pages/
+Crawl-delay: 5
+Sitemap: /sitemap.xml

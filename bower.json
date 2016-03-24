@@ -1,0 +1,16 @@
+{
+  "name": "permosegaard.com",
+  "private": true,
+  "dependencies": {
+    "metrics-graphics": "~2.7.0",
+    "leaflet": "~0.7.7",
+    "lunr.js": "~0.6.0",
+    "highlightjs": "~8.9.1",
+    "semantic": "semantic-ui#~2.1.6",
+    "hopscotch": "~0.2.5",
+    "pushstream": "*",
+    "SoundManager2": "soundmanager2#*",
+    "backbone": "~1.2.3",
+    "jquery.pulsate": "*"
+  }
+}

@@ -1,0 +1,499 @@
+{{> header }}
+
+<noscript>This page requires javascript, +1 a feature request on github if you're intersted in seeing a text version of this page.</noscript>
+
+<script src="/libs/d3/d3.min.js"></script>
+
+<link rel="stylesheet" href="/libs/metrics-graphics/dist/metricsgraphics.css" />
+<script src="/libs/metrics-graphics/dist/metricsgraphics.min.js"></script>
+<!--<link rel="stylesheet" href="/stylesheets/mg_line_brushing.css">
+	<script src="/scripts/mg_line_brushing.js"></script>-->
+<style>
+.mg-markers text { fill: white; }
+.mg-active-datapoint { fill: white; }
+path.mg-confidence-band { opacity: 0.05; }
+</style>
+
+<link rel="stylesheet" href="/libs/leaflet/dist/leaflet.css" />
+<script src="/libs/leaflet/dist/leaflet.js"></script>
+<script src='https://api.mapbox.com/mapbox.js/v2.2.3/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v2.2.3/mapbox.css' rel='stylesheet' />
+<script src="/scripts/L.Terminator.js"></script>
+
+<script src="/libs/pushstream/pushstream.js"></script>
+
+<link rel="stylesheet" href="/libs/hopscotch/dist/css/hopscotch.css" />
+<script src="/libs/hopscotch/dist/js/hopscotch.js"></script>
+
+<style>
+    .launch.button {
+        display: none;
+        width: 35px;
+        white-space: nowrap;
+        overflow: hidden;
+        transition: 0.3s width, 0.5s transform ease;
+    }
+    .launch.button .text {
+        position: absolute;
+        white-space: nowrap;
+        top: auto;
+        left: 45px;
+        opacity: 0;
+        transition: 0.3s opacity 0.1s;
+    }
+    .launch.button:hover .text { opacity: 1; }
+    .launch.button.control_options:hover { width: 130px; }
+
+	.control_options_popup { min-width: 435px !important; max-width: 435px !important; }
+
+	.leaflet-container { background-color: #1e1e1e; }
+
+	#control_detailed_target {} // TODO: fixme
+</style>
+
+
+<div class="ui grid">
+	<div class="six wide left aligned column">
+		<div class="ui launch right attached big button control_options">
+			<i class="options icon"></i>
+			<span class="text">Options</span>
+		</div>
+		<div class="ui popup top left transition hidden control_options_popup">
+			<div class="ui vertical divided list">
+				<div class="item buttons">
+					<div class="ui horizontal divided list">
+						<div class="item">
+							<div class="ui center aligned basic segment">
+								<i class="huge world icon"></i>
+								<br/><br/><br/>
+								<button class="ui button control_geomap_selector">geomap</button>
+							</div>
+						</div>
+
+						<div class="item">
+							<div class="ui center aligned basic segment">
+								<i class="huge line chart icon"></i>
+								<br/><br/><br/>
+								<button class="ui button control_detailed_selector">detailed</button>
+							</div>
+						</div>
+
+						<div class="item">
+							<div class="ui center aligned basic segment">
+								<i class="huge money icon"></i>
+								<br/><br/><br/>
+								<button class="ui button control_history_selector">history</button>
+							</div>
+						</div>
+					</div>
+					<br/><br/>
+				</div>
+
+				<div class="item">
+					<div class="ui basic segment">
+						<h3 class="ui left floated header">show balance</h3>
+						<button class="ui right floated toggle active button control_balance_toggler" data-toggled="show">shown</button>
+					</div>
+					<br/>
+				</div>
+
+				<div class="item">
+					<div class="ui basic segment">
+						<h3 class="ui left floated header">show log</h3>
+						<button class="ui right floated toggle button control_log_toggler" data-toggled="shown">show</button>
+					</div>
+					<br/>
+				</div>
+
+				<div class="item">
+					<div class="ui basic segment">
+						<h3 class="ui left floated header">log lines</h3>
+						<div class="ui right floated buttons">
+						  <button class="ui disabled button" data-toggled="1">1</button>
+						  <button class="ui disabled button" data-toggled="5">5</button>
+						  <button class="ui disabled button" data-toggled="20">20</button>
+						</div>
+					</div>
+					<br/>
+				</div>
+
+				<div class="item">
+					<div class="ui basic segment">
+						<h3 class="ui left floated header" style="text-align: middle;">time culling</h3>
+						<div class="ui right floated buttons">
+						  <button class="ui disabled button" data-toggled="1D">1D</button>
+						  <button class="ui disabled button" data-toggled="3D">3D</button>
+						  <button class="ui disabled button" data-toggled="5D">5D</button>
+						</div>
+					</div>
+					<br/>
+				</div>
+
+				<div class="item">
+					<div class="ui basic segment">
+						<h3 class="ui left floated header">sound alerts</h3>
+						<button class="ui right floated toggle disabled button" data-toggled="motivated">motivate</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="four wide middle aligned center aligned column" style="box-shadow: inset 0px 0px 2px 2px rgba( 0, 0, 0, 0.1 );">
+		<!--<i class="large dollar icon"></i>-->
+		<h1 class="ui inverted header control_balance">0.00</h1>
+	</div>
+
+	<div class="six wide right aligned column">
+	  	<button class="ui big icon button control_help">
+			<i class="help icon"></i>
+		</button>
+	</div>
+</div>
+
+<div class="ui inverted container" style="width: 100%;">
+	<div class="ui active tab control_geomap" data-tab="geomap" style="padding: 20px;">
+		<div class="ui inverted container segment" style="width: 100%; padding: 2px; box-shadow: inset 0px 0px 5px 2px rgba( 0, 0, 0, 0.75 );">
+			<div id="control_geomap_target" style="width: 100%; height: 700px;"></div>
+		</div>
+	</div>
+	<div class="ui tab control_detailed" data-tab="detailed" style="padding: 20px;">
+		<div class="ui inverted middle aligned center aligned container segment" style="width: 100%; padding: 2px; box-shadow: inset 0px 0px 5px 2px rgba( 0, 0, 0, 0.75 );">
+			<div id="control_detailed_target" style="width: 100%; height: 700px;">
+			  <div class="ui active inverted"><div class="ui inverted indeterminate text active loader"></div></div>
+			</div>
+		</div>
+	</div>
+	<div class="ui tab control_history" data-tab="history">
+		history
+	</div>
+</div>
+
+<div class="ui inverted center aligned container control_log" style="display: none; padding: 20px; min-width: 200px; box-shadow: inset 0px 0px 2px 2px rgba( 0, 0, 0, 0.1 );"></div>
+
+<br/>
+
+<script>
+	$( "button.ui.toggle.button" ).on( "click", function()  {
+		if ( $( this ).hasClass( "active" ) )  {
+			buffer = $( this ).text();
+			$( this ).text( $( this ).attr( "data-toggled" ) );
+			$( this ).attr( "data-toggled", buffer );
+			$( this ).removeClass( "active" );
+		}
+		else {
+			buffer = $( this ).text();
+			$( this ).text( $( this ).attr( "data-toggled" ) );
+			$( this ).attr( "data-toggled", buffer );
+			$( this ).addClass( "active" );
+		}
+	});
+
+    $( ".control_options" ).popup({
+		inline: true, exclusive: true,
+		hoverable: true, position: "right center", on: "click"
+    });
+
+	$( ".control_geomap_selector" ).on( "click", function() { $.tab( "change tab", "geomap" ); });
+	$( ".control_detailed_selector" ).on( "click", function() {
+		$.tab( "change tab", "detailed" );
+		if (typeof reference_detailed_graph == "undefined" ) {
+			window.setInterval( refresh_graph_timer_interval, 1000 );
+			refresh_graph_timer_set();
+		}
+	});
+	$( ".control_history_selector" ).on( "click", function() { $.tab( "change tab", "history" ); });
+
+	$( ".control_balance_toggler" ).on( "click", function() { $( ".control_balance" ).fadeToggle(); } )
+	$( ".control_log_toggler" ).on( "click", function() { $( ".control_log" ).fadeToggle(); } )
+
+	// TODO: http://semantic-ui.com/modules/dimmer.html
+	$( ".control_help" ).on( "click", function() {
+		hopscotch.startTour({
+			id: "help",
+			steps: [ {
+				title: "this is the help", content: "helpyhelpyhelpy",
+				target: ( ".control_help" ), placement: "left"
+			} ]
+		});
+	});
+
+	leaflet_map_reference = L.mapbox.map( "control_geomap_target", "mapbox.dark", {
+		tileLayer: {
+			continuousWorld: false,
+			noWrap: true
+		},
+		minZoom: 2, maxZoom: 14, maxBounds: [ [ 90, -180], [ -90, 180 ] ],
+		accessToken: "pk.eyJ1IjoicGVybW9zZWdhYXJkIiwiYSI6ImNpaG5qa21rMzAwaG52NGtxOHNwbGgwbTEifQ.-mVFCKS_DXCHYI6zTGf1tA"
+	}).setView( [ 13.752724664397, 35.595703125 ], 3 );
+
+	L.marker( [ 43.6483,-79.3833 ] ).addTo( leaflet_map_reference ); // TSX
+	L.marker( [ 40.706833, -74.011028 ] ).addTo( leaflet_map_reference ); // NYSE
+	L.marker( [ 40.7095563, -74.0131305 ] ).addTo( leaflet_map_reference ); // NASDAQ
+	L.marker( [ 51.514722, -0.099444 ] ).addTo( leaflet_map_reference ); // LSE
+	L.marker( [ 51.502778, -0.016389 ] ).addTo( leaflet_map_reference ); // FTSE_AIM
+	L.marker( [ 50.115278, 8.677778 ] ).addTo( leaflet_map_reference ); // FSX
+	L.marker( [ 19.060278, 72.859722 ] ).addTo( leaflet_map_reference ); // NSE
+	L.marker( [ 31.238333, 121.506389 ] ).addTo( leaflet_map_reference ); // SSE
+	L.marker( [ 22.28414, 114.15768 ] ).addTo( leaflet_map_reference ); // HKEx
+	L.marker( [ -33.8636278, 151.2087814 ] ).addTo( leaflet_map_reference ); // ASX
+
+	leaflet_terminator_reference = L.terminator();
+	leaflet_terminator_reference.addTo( leaflet_map_reference );
+	leaflet_terminator_timer = window.setInterval( function() {
+		leaflet_terminator_reference.setLatLngs( L.terminator().getLatLngs() ) ;
+		leaflet_terminator_reference.redraw();
+	}, 5000 );
+
+	// dirty global to deal with the sudden influx of data on page load
+	document_finished_loading = false;
+
+	// TODO: not strictly a percentage any more... needs thought
+	function proportion( first, second )  { return ( first / second ) - 1; }
+
+	refresh_graph_time = null;
+	refresh_graph_timeout = 1;
+	function refresh_graph_timer_set()  { refresh_graph_time = ( new Date ).getTime(); }
+	function refresh_graph_timer_interval()  {
+		if ( refresh_graph_time != null ) {
+			if ( ( new Date ).getTime() - refresh_graph_time > refresh_graph_timeout * 1000) {
+				refresh_graph();
+				refresh_graph_time = null;
+			}
+		}
+	}
+	
+	document_loaded_at = ( new Date ).getTime()
+	function document_older_than( seconds )  {
+		if ( document_loaded_at + ( seconds * 1000 ) < ( new Date ).getTime() ) { return true; }
+		else { return false; }
+	}
+
+	function balance_pulse( colour, speed )  {
+		if ( document_older_than( 5 ) && $( ".control_balance").queue().length < 1 )  {
+			original_colour = $( ".control_balance" ).css( "color" );
+			$( ".control_balance" ).animate( {
+				"color": colour,
+				"opacity": "+=0.2",
+				"font-size": "+=10%",
+				"font-weight": "bold",
+				"text-shadow": "0px 0px 2px #000000" }, speed );
+			$( ".control_balance" ).animate( {
+				"color": original_colour,
+				"opacity": "-=0.2",
+				"font-size": "-=10%",
+				"font-weight": "normal",
+				"text-shadow": "0px 0px 1px #000000" }, speed * 2 ); // dat glide
+		}
+	}
+
+	__snapshots = {}; // TODO: consider/test this long running for leak
+	__ticks = {}; // TODO: consider/test this long running for leak
+	__annotations = {}; // TODO: consider/test this long running for leak
+	__balances = {}; // TODO: ^^
+
+	__culling_days = 2;
+
+	__log = [];
+	__log_archive = []; // TODO: consider/test this long running for leak
+	__log_max_size = 1;
+	function add_log_entry( message )  {
+		if ( __log.length == __log_max_size )  {
+			popped = __log.shift();
+			//console.log( "popping entry '" + popped + "' from log" );
+			__log_archive.push( popped )
+		}
+		__log.push( message + "<br/>" );
+		refresh_log();
+	}
+	function refresh_log()  {
+		text = "";
+		for ( i = ( __log.length - 1 ); i >= 0; i-- )  { text += __log[ i ]; }
+		$( ".control_log" ).html( text );
+	}
+
+	function refresh_graph()  {
+		$( "#control_detailed_target").html( "<div class='ui active inverted'><div class='ui inverted indeterminate text active loader'></div></div>" );
+
+		timestamp_format = d3.time.format( "%Y-%m-%d %H:%M:%S" );
+
+		data = []; legend = []; annotations = [];
+
+		$.each( __ticks, function( index, value )  {
+			symbol = index;
+			if ( symbol in __snapshots ) {
+				ticks = [];
+				$.each( value, function( x, y )  {
+					x_splitted = x.split( "." );
+					if ( x_splitted.length > 0 ) {
+						now = new Date();
+						parsed_timestamp = timestamp_format.parse( x_splitted[ 0 ] );
+						if ( Math.abs( now - parsed_timestamp ) / 86400000 <= __culling_days ) { // milliseconds in a day
+							ticks.push({
+								"symbol": symbol, "timestamp": parsed_timestamp,
+								"ask": proportion( y[ "ask" ], __snapshots[ symbol ][ "open" ] ),
+								"bid": proportion( y[ "bid" ], __snapshots[ symbol ][ "open" ] ),
+								"price": proportion( y[ "price" ], __snapshots[ symbol ][ "open" ] )
+							});
+						}
+					}
+				});
+				data.push( ticks );
+				legend.push( symbol );
+			}
+		});
+		$.each( __annotations, function( index, value )  {
+			symbol = index;
+
+			$.each( value, function( x, y )  {
+				annotations.push({
+					"timestamp": timestamp_format.parse( x.split( "." )[ 0 ] ),
+//					"label": y[ "message" ] + " " + symbol
+					"label": symbol
+				});
+			})
+		});
+
+		graph_settings = {
+			missing_text: "[ POOLING FOR DATA ]",
+			data: data, markers: annotations, // markers take a click function! https://github.com/mozilla/metrics-graphics/wiki/Graphic#chart_type
+			missing_is_zero: true, missing_is_hidden: true, missing_is_hidden_accessor: 'dead',
+			target: '#control_detailed_target',
+//			width: $( "#control_detailed_target" ).width() * 0.98,
+//			height: $( "#control_detailed_target" ).height() * 0.96,
+			full_height: true, full_width: true,
+			left: 20, right: 50, bottom: 30, // 'right' required for legend
+			legend: legend,
+			chart_type: "line", /*max_data_size: 2,*/
+			colors: [
+				"#00ccff", "#3300cc", "#66cccc", "#cc3300", "#ff66cc", "#66cc00", "#ff33cc", "#660066", "#cc00cc",
+				"#cc00ff", "#996633", "#33ff00", "#009933", "#ff00ff", "#0066cc", "#00cc99", "#ffffff", "#cc66ff",
+				"#000099", "#666699", "#99cc00", "#0033ff", "#6633ff", "#990000", "#ffff99", "#990066", "#663366",
+				"#339900", "#cc99ff", "#333399", "#cc0066", "#336600", "#3399ff", "#ffcc33", "#3300ff", "#33ff99", // import random
+				"#ff9966", "#99ccff", "#ccccff", "#cc66cc", "#99ff00", "#66ffff", "#ffff66", "#663333", "#006633", // tests = []
+				"#33ccff", "#6633cc", "#66ff66", "#66cc66", "#ff00cc", "#ccff00", "#000066", "#ff3399", "#66ccff", // for i in range( 0, 6 ):
+				"#00cccc", "#333366", "#33cccc", "#669933", "#ccffff", "#ff6666", "#339966", "#9900cc", "#cc0099", //     for j in range( 0, 6 ):
+				"#660033", "#cc3366", "#9933cc", "#00ffff", "#cc99cc", "#993366", "#66cc99", "#993333", "#999933", //         for k in range( 0, 6 ):
+				"#003399", "#ff9900", "#339999", "#ff3366", "#cc0033", "#cc0000", "#996600", "#00ffcc", "#ff6633", //             tests.append( '"#{i}{j}{k}"'.format( i=format( i*51, "02x" ),
+				"#999900", "#cc9933", "#999999", "#330066", "#333333", "#666633", "#330033", "#666600", "#336699", //                                                  j=format( j*51, "02x" ),
+				"#990099", "#ffcc66", "#6666ff", "#6600cc", "#cc6633", "#33ff33", "#009900", "#666666", "#9933ff", //                                                  k=format( k*51, "02x" ) ) )
+				"#ff3300", "#3399cc", "#cc9966", "#0033cc", "#9966ff", "#00ff33", "#006666", "#9999cc", "#cc33ff", // counter = 0; output = ""
+				"#003366", "#990033", "#ffffcc", "#ff3333", "#ffcc99", "#ccff33", "#33ffff", "#99cc99", "#cc6699", // random.shuffle( tests )
+				"#336633", "#ff33ff", "#3366cc", "#ccffcc", "#ff9999", "#9999ff", "#33cc33", "#99ffff", "#ff6699", // for test in tests:
+				"#00ff66", "#99ffcc", "#cccc00", "#66ff99", "#660000", "#6600ff", "#66ff00", "#663300", "#333300", //     if 0 <= counter <= 7: output += test + ", "; counter += 1
+				"#ffff33", "#669900", "#ff99ff", "#000033", "#cccc66", "#336666", "#00cc33", "#003333", "#009999", //     else: output += test + ",\n"; counter = 0
+				"#003300", "#669999", "#00cc66", "#99cc33", "#33cc00", "#cc6600", "#00ff99", "#6699ff", "#999966", // print( output )
+				"#ff0000", "#3333ff", "#996666", "#000000", "#ff0099", "#993300", "#993399", "#33cc99", "#cc33cc", //
+				"#6666cc", "#ffcc00", "#6699cc", "#99ff99", "#99cccc", "#cc9900", "#006600", "#cc6666", "#cccccc", // *** USE ABOVE TO REGEN THE LIST ON THE LEFT ***
+				"#3333cc", "#33ff66", "#3366ff", "#cc3333", "#00cc00", "#9900ff", "#99cc66", "#ff6600", "#66ff33",
+				"#ff9933", "#ff66ff", "#996699", "#ffccff", "#cccc99", "#cc9999", "#ffff00", "#cccc33", "#669966",
+				"#66ffcc", "#0099ff", "#0099cc", "#339933", "#99ff33", "#33ffcc", "#66cc33", "#009966", "#ffcccc",
+				"#00ff00", "#99ff66", "#660099", "#33cc66", "#ccff99", "#ff99cc", "#cc3399", "#ff0033", "#9966cc",
+				"#ff0066", "#ccff66", "#330099", "#0000cc", "#0066ff", "#663399", "#006699", "#0000ff", "#330000"
+			],
+			area: false,
+			animate_on_load: false,
+			transition_on_update: false,
+			x_accessor: 'timestamp', y_accessor: 'price',
+			min_y_from_data: true,
+			y_axis: false, x_axis: true,
+			show_secondary_x_label: false, // overlap issues :(
+			show_confidence_band: [ "bid", "ask" ],
+			y_rollover_format: function( data )  {
+				return "P" + data[ "price"].toFixed( 2 ) + "/B" + data[ "bid"].toFixed( 2 ) + "/A" + data[ "ask"].toFixed( 2 );
+			},
+			x_rollover_format: function( data )  {
+				return data[ "symbol" ] + " | " + d3.time.format( "%d/%m %H:%M" )( data[ "timestamp" ] ) + " | ";
+			}
+		};
+		if ( data.length < 1 )  { graph_settings[ "chart_type" ] = "missing-data"; }
+
+		$( "#control_detailed_target").empty();
+
+		MG.data_graphic( graph_settings );
+		reference_detailed_graph = true; // shame mg doesn't return anything
+	}
+
+	function is_symbol_in_X( symbol, x )  { if ( symbol in x ) { return true; } else { return false; }; }
+	function is_symbol_in_ticks( symbol )  { return is_symbol_in_X( symbol, __ticks ); }
+	function is_symbol_in_annotations( symbol )  { return is_symbol_in_X( symbol, __annotations ); }
+
+	function add_snapshot( timestamp, exchange, symbol, open )  { __snapshots[ symbol ] = { "timestamp": timestamp, "exchange": exchange, "open": open }; }
+
+	function process_snapshot( json )  {
+		add_log_entry( "received snapshot at '" + json[ "timestamp" ] + "' for '" + json[ "symbol" ] + "' from '" + json[ "exchange" ] + "' with values O" + json[ "data" ][ "open"] );
+		add_snapshot( json[ "timestamp" ], json[ "exchange" ], json[ "symbol" ], json[ "data" ][ "open" ] );
+		balance_pulse( "#663399", 800 );
+	}
+
+	function add_tick( timestamp, exchange, symbol, ask, bid, price ) {
+		if ( ! is_symbol_in_ticks( symbol ) )  { __ticks[ symbol ] = {}; }
+		__ticks[ symbol ][ timestamp ] = { "ask": ask, "bid": bid, "price": price }
+	}
+
+	function process_tick( json )  {
+		add_log_entry( "received tick at '" + json[ "timestamp" ] + "' for '" + json[ "symbol" ] + "' from '" + json[ "exchange" ] + "' with values P" + json[ "data" ][ "ask" ] + "/B" + json[ "data" ][ "bid" ] + "/A" + json[ "data" ][ "ask" ] );
+		add_tick( json[ "timestamp" ], json[ "exchange" ], json[ "symbol" ], json[ "data" ][ "ask" ], json[ "data" ][ "bid" ], json[ "data" ][ "price" ] );
+		refresh_graph_timer_set();
+	}
+
+	function add_annotation( timestamp, symbol, message ) {
+		if ( ! is_symbol_in_annotations( symbol ) )  { __annotations[ symbol ] = {}; }
+		__annotations[ symbol ][ timestamp ] = { "message": message }
+	}
+
+	function process_annotation( json )  {
+		add_log_entry( "received annotation at '" + json[ "timestamp" ] + "' for '" + json[ "symbol" ] + "' with '" + json[ "message" ] );
+		add_annotation( json[ "timestamp" ], json[ "symbol" ], json[ "message" ] )
+		refresh_graph_timer_set();
+	}
+
+	function add_balance( timestamp, balance )  { __balances[ timestamp ] = balance; }
+
+	function process_balance( json )  {
+		add_log_entry( "received balance at '" + json[ "timestamp" ] + "' update to '" + json[ "balance" ] + "' from '" + $( "#balance").text() );
+		add_balance( json[ "timestamp" ], json[ "balance" ] );
+		$( ".control_balance").text( json[ "balance" ] );
+		balance_pulse( "#DC143C", 1500 );
+	}
+
+	function parse_message( message )  {
+		message_json = $.parseJSON( message );
+//		console.log( JSON.stringify( message_json  ) )
+		switch( message_json[ "type" ] )  {
+			case "snapshot":
+				process_snapshot( message_json );
+				break;
+			case "historical": // not implemented yet - TODO: what to pass/how to use it
+				break;
+			case "tick":
+				process_tick( message_json );
+				break;
+			case "annotation":
+				process_annotation( message_json );
+				break;
+			case "balance":
+				process_balance( message_json );
+				break;
+			default:
+				logger.error( "unable to parse type '" + message_json[ "type" ] + "' from message" );
+		}
+	}
+
+	PushStream.LOG_LEVEL = "critical"; // debug
+	var pushstream = new PushStream({
+//		host: window.location.hostname,
+		host: "websocket." + window.location.hostname,
+		timeout: 30000,
+		modes: 'websocket',
+		channelsByArgument: false,
+		messagesPublishedAfter: new Date( 0 ),
+		messagesControlByArgument: true
+	});
+	pushstream.onmessage = function ( text ) { parse_message( atob( text ) ); };
+	pushstream.onerror = function ( error ) { console.log( "pushstream error with '" + error + "'" ); };
+	pushstream.addChannel( "trader" ); // think of something better, maybe split channels or sth.
+	pushstream.connect();
+</script>
+
+{{> footer }}

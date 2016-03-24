@@ -1,0 +1,28 @@
+{{> header }}
+
+<style>
+	.control_cookie {
+		padding: 0px !important; padding-left: 10px !important; padding-right: 20px !important;
+		position: absolute !important; left: 40px; top: 20px; min-width: 950px !important;
+		z-index: 1000;
+	}
+</style>
+
+<div class="ui large warning message control_cookie">
+	<div class="ui grid">
+		<div class="row">
+			<div class="middle aligned right aligned one wide column"><i class="warning icon"></i></div>
+			<div class="middle aligned fourteen wide column">
+				Cookies are <b>not</b> in use and you will <b>not</b> be tracked anywhere on this site.<br/>
+				The full source is available on github and pull requests are always welcome, have fun!
+			</div>
+			<div class="middle aligned left aligned one wide column"><i class="close icon"></i></div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$( ".control_cookie" ).on( "click", function() { $( this ).closest( ".message" ).transition( "fade" ); });
+</script>
+
+{{> footer }}

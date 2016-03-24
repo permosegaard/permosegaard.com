@@ -1,0 +1,17 @@
+# TODO: redirect to man page a like for links/curl/etc.
+
+RewriteEngine on
+
+DirectoryIndex disabled
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteRule ^pages/(.*) /$1 [R=301,END]
+
+RewriteCond %{ENV:REDIRECT_STATUS} ^$
+RewriteRule ^(.*)index\.html$ /$1 [R=301,END] # SEO :(
+
+RewriteRule ^$ /index.html
+RewriteRule ^(.*)/$ /$1/index.html
+
+# this needs to be at the bottom
+RewriteRule (.*)\.html$ pages/$1.html [END]

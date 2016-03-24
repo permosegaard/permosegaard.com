@@ -1,0 +1,102 @@
+{{> header }}
+
+<script src="/libs/SoundManager2/script/soundmanager2-jsmin.js"></script>
+<script src="/libs/underscore/underscore.js"></script>
+<script src="/libs/backbone/backbone-min.js"></script>
+<script src="/scripts/webvs.js"></script>
+
+<style>
+	BODY {
+		margin: 0px;
+		padding: 0px;
+		overflow: hidden;
+	}
+</style>
+
+<canvas id="canvas" style="z-index: -1000; position:fixed; top: 0px; left: 0px; height: 100vh; width: 100vw; display: block;"></canvas>
+
+<div class="ui popup bottom center transition hidden info_target">{{{contents}}}</div>
+
+<!-- TODO: make menu bar transparent so vis takes whole page -->
+<div class="ui bottom fixed menu" style="padding: 10px; padding-bottom: 20px; border: 0px; max-height: 70px; background: transparent !important;">
+	<div class="ui large icon button control_pause" style="margin-left: 10px; margin-right: 10px;"><i class="pause icon"></i></div>
+	<div class="ui large icon button control_rewind" style="margin-right: 20px;"><i class="fast backward icon"></i></div>
+
+	<div class="ui violet progress control_progress" style="width: 100%;">
+		<div class="bar" style="position: relative; top: -5px;"></div>
+	</div>
+	<div class="ui popup bottom center transition hidden">scanning not-available</div>
+
+	<div class="ui large icon button control_mute" style="margin-left: 20px;"><i class="volume off icon"></i></div>
+	<div class="ui large icon button control_download" style="margin-left: 10px;"><i class="download icon"></i></div>
+	<div class="ui large icon button control_info" style="margin-left: 10px; margin-right: 10px;"><i class="info icon"></i></div>
+</div>
+
+<script>
+	// TODO: pick a preset and convert using http://grandchild.github.io/AVS-File-Decoder/ & http://www.cleancss.com/json-minify/
+	// TODO: check for flash and throw an error if not, explain webaudio doesn't do pretties
+	// TODO: minify the avs convert and cycle on a timer between ~5
+	$( ".control_progress" ).popup({
+		inline: false, exclusive: true,
+		hoverable: true, position: "top center", on: "click"
+	});
+
+	$( ".control_info" ).popup({
+		popup: $( ".info_target" ),
+		inline: false, exclusive: true,
+		hoverable: true, position: "top center", on: "click"
+    });
+
+	$( ".control_pause" ).on( "click", function() { sound_reference.togglePause(); });
+	$( ".control_rewind" ).on( "click", function() { sound_reference.setPosition( 0 ); });
+
+	soundManager.setup({
+        debugMode: true,
+        url: "/libs/SoundManager2/swf/",
+        flashVersion: 9,
+        preferFlash: true,
+        useHighPerformance: true,
+		onready: function() {
+			analyser = new Webvs.SMAnalyser();
+
+			webvs_reference = new Webvs.Main( {
+				canvas: document.getElementById( "canvas" ),
+				analyser: analyser,
+				resourcePrefix: "../resources/"
+			});
+
+			presets = [
+				{name:"Science of Superscope-mod",description:"Original Author: Marco",clearFrame:1,resources:{uris:{}},components:[{type:"EffectList",code:{init:"",perFrame:""},output:"ADDITIVE",input:"IGNORE",clearFrame:!1,enableOnBeat:!1,enableOnBeatFor:1,id:"EffectList_509",enabled:!0,components:[{type:"FadeOut",speed:.4,color:"#000000",id:"FadeOut_493",enabled:!0},{type:"SuperScope",code:{init:"n=800",perFrame:"t=t-v*0.5",onBeat:"t=t+0.3;n=100+rand(900);",perPoint:"d=D/n;r=(i-(t*3)); x=(atan(r+d-t)*cos(r+d-t+i)); y=((i+cos(d+v*1.2))-1.5)*1.7;z=-(cos(t+i)+log(v)*cos(r*3))*3;red=cos(r)+1;blue=sin(r);green=sin(i)/2"},blendMode:"REPLACE",channel:"CENTER",source:"WAVEFORM",drawMode:"LINES",thickness:1,clone:1,colors:["#ffffff"],cycleSpeed:.01,id:"SuperScope_409",enabled:!0}]},{type:"Convolution",edgeMode:"EXTEND",autoScale:!0,scale:0,kernel:[0,1,0,1,1,1,0,1,0],bias:0,id:"Blur1",enabled:!0},{type:"ClearScreen",beatCount:1,color:"#000000",blendMode:"REPLACE",id:"ClearScreen_543",enabled:!0},{type:"Convolution",edgeMode:"EXTEND",autoScale:!0,scale:0,kernel:[0,1,0,1,1,1,0,1,0],bias:0,id:"Blur2",enabled:!0}]},
+				{name:"Science of Superscope",description:"Original Author: Marco",clearFrame:!1,resources:{uris:{}},components:[{type:"EffectList",code:{init:"",perFrame:""},output:"ADDITIVE",input:"IGNORE",clearFrame:!1,enableOnBeat:!1,enableOnBeatFor:1,id:"EffectList_509",enabled:!0,components:[{type:"FadeOut",speed:.4,color:"#000000",id:"FadeOut_493",enabled:!0},{type:"SuperScope",code:{init:"n=800",perFrame:"t=t-v*0.5",onBeat:"t=t+0.3;n=100+rand(900);",perPoint:"d=D/n;r=(i-(t*3)); x=(atan(r+d-t)*cos(r+d-t+i)); y=((i+cos(d+v*1.2))-1.5)*1.7;z=-(cos(t+i)+log(v)*cos(r*3))*3;red=cos(r)+1;blue=sin(r);green=sin(i)/2"},blendMode:"REPLACE",channel:"CENTER",source:"WAVEFORM",drawMode:"LINES",thickness:1,clone:1,colors:["#ffffff"],cycleSpeed:.01,id:"SuperScope_409",enabled:!0}]},{type:"Convolution",edgeMode:"EXTEND",autoScale:!0,scale:0,kernel:[0,1,0,1,1,1,0,1,0],bias:0,id:"Blur1",enabled:!0},{type:"ClearScreen",beatCount:1,color:"#000000",blendMode:"REPLACE",id:"ClearScreen_543",enabled:!0},{type:"Convolution",edgeMode:"EXTEND",autoScale:!0,scale:0,kernel:[0,1,0,1,1,1,0,1,0],bias:0,id:"Blur2",enabled:!0}]},
+				{name:"Jello Cube",author:"Steven Wittens / UnConeD (http://acko.net)",clearFrame:!1,components:[{type:"EffectList",enabled:!0,components:[{type:"DynamicMovement",noGrid:!0,compat:!0,code:{perPixel:"d=sin(d*(1+d*sin(r*150)*.15))*.5+d*.5;r=r+.01;"}},{type:"EffectList",enableOnBeat:!0,enableOnBeatFor:1,output:"MAXIMUM",components:[{type:"BufferSave",action:"RESTORE"},{type:"ColorClip",enabled:!1,mode:"ABOVE",color:"#9F9F9F",outColor:"#9F9F9F"}]}]},{type:"ColorMap",output:"REPLACE",key:"RED",maps:[[{color:"#FFFFFF",index:52},{color:"#0FA7F0",index:130},{color:"#000000",index:255}]]},{type:"EffectList",clearFrame:!0,input:"IGNORE",output:"SUBTRACTIVE1",components:[{type:"SuperScope",clone:12,blendMode:"ADDITIVE",code:{init:"dx=8;n=sqr(dx);id=2/dx;id1=1/(dx-1);",onBeat:["rxt=(abs((getosc(.55,0,0)+getosc(.91,0,0))*2000)%628)*.01;","ryt=(abs((getosc(.12,0,0)+getosc(.41,0,0))*2000)%628)*.01;","rzt=(abs((getosc(.55,0,0)+getosc(.91,0,0))*2000)%628)*.01;"].join("\n"),perFrame:["t=t-.05;","dt=sin(t)*sin(t*.411+1)*cos(sin(t*.117))*.5+3;","gx=-1;","gy=0;","rx=rx*.95+rxt*.05;","ry=ry*.95+ryt*.05;","rz=rz*.95+rzt*.05;","cx=cos(rx);","sx=sin(rx);","cy=cos(ry);","sy=sin(ry);","cz=cos(rz);","sz=sin(rz);","af=w/h;","p00=getosc(select(cid,0.41,0.41,0.49,0.49,0.36,0.36,0.41,0.41,0.41,0.41,0.67,0.67),0,0)*.35+p00*.65;","p10=getosc(select(cid,0.00,0.00,0.15,0.15,0.24,0.24,0.60,0.60,0.00,0.00,0.76,0.76),0,0)*.35+p10*.65;","p20=getosc(select(cid,0.92,0.92,0.84,0.84,0.20,0.20,0.74,0.74,0.92,0.92,0.37,0.37),0,0)*.35+p20*.65;","p30=getosc(select(cid,0.36,0.36,0.38,0.38,0.17,0.17,0.67,0.67,0.36,0.36,0.17,0.17),0,0)*.35+p30*.65;","p01=getosc(select(cid,0.60,0.60,0.26,0.26,0.19,0.19,0.06,0.06,0.06,0.06,0.97,0.97),0,0)*.35+p01*.65;","p11=getosc(select(cid,0.59,0.59,0.48,0.48,0.54,0.54,0.42,0.42,0.85,0.85,0.23,0.23),0,0)*.55+p11*.65;","p21=getosc(select(cid,0.77,0.77,0.11,0.11,0.41,0.41,0.56,0.56,0.39,0.39,0.30,0.30),0,0)*.55+p21*.65;","p31=getosc(select(cid,0.84,0.84,0.25,0.25,0.01,0.01,0.97,0.97,0.19,0.19,0.01,0.01),0,0)*.35+p31*.65;","p02=getosc(select(cid,0.74,0.74,0.19,0.19,0.33,0.33,0.49,0.49,0.49,0.49,0.70,0.70),0,0)*.35+p02*.65;","p12=getosc(select(cid,0.52,0.52,1.00,1.00,0.07,0.07,0.75,0.75,0.61,0.61,0.61,0.61),0,0)*.55+p12*.65;","p22=getosc(select(cid,0.13,0.13,0.75,0.75,0.27,0.27,0.83,0.83,0.73,0.73,0.43,0.43),0,0)*.55+p22*.65;","p32=getosc(select(cid,0.20,0.20,0.74,0.74,0.93,0.93,0.70,0.70,0.33,0.33,0.93,0.93),0,0)*.35+p32*.65;","p03=getosc(select(cid,0.67,0.67,0.20,0.20,0.38,0.38,0.49,0.49,0.49,0.49,0.20,0.20),0,0)*.35+p03*.65;","p13=getosc(select(cid,0.76,0.76,0.94,0.94,0.25,0.25,0.26,0.26,0.15,0.15,0.94,0.94),0,0)*.35+p13*.65;","p23=getosc(select(cid,0.37,0.37,0.35,0.35,0.74,0.74,0.19,0.19,0.84,0.84,0.35,0.35),0,0)*.35+p23*.65;","p33=getosc(select(cid,0.17,0.17,0.93,0.93,0.93,0.93,0.20,0.20,0.38,0.38,0.93,0.93),0,0)*.35+p33*.65;","cr=sin(hu)*.5+.9;","cg=sin(hu+2.09)*.5+.9;","cb=sin(hu+4.18)*.5+.9;","xo=sin(t*.741)*sin(t*.114)*cos(sin(t*.41));","yo=sin(t*.574)*sin(t*.319)*cos(sin(t*.33));"].join("\n"),perPoint:["gy=if(equal(gx,dx-1),gy+1,gy);","gx=if(below(gx,dx-1),gx+1,0);","x1=select(cid%2, gx, gy)*id1;","y2=select(cid%2, gy, gx)*id1;","red=1-x1;","green=1-y2;","c1=sqr(red)*red*p00 + 3*sqr(red)*x1*p10 + 3*red*sqr(x1)*p20 + sqr(x1)*x1*p30;","c2=sqr(red)*red*p01 + 3*sqr(red)*x1*p11 + 3*red*sqr(x1)*p21 + sqr(x1)*x1*p31;","c3=sqr(red)*red*p02 + 3*sqr(red)*x1*p12 + 3*red*sqr(x1)*p22 + sqr(x1)*x1*p32;","c4=sqr(red)*red*p03 + 3*sqr(red)*x1*p13 + 3*red*sqr(x1)*p23 + sqr(x1)*x1*p33;","c1=3*(sqr(green)*green*c1 + 3*sqr(green)*y2*c2 + 3*green*sqr(y2)*c3 + sqr(y2)*y2*c4) + 1;","px=select(cid, x1*2-1, x1*2-1, x1*2-1, x1*2-1, 1,      1,     -1,     -1,      x1*2-1, x1*2-1, x1*2-1, x1*2-1);","py=select(cid, y2*2-1, y2*2-1, y2*2-1, y2*2-1, x1*2-1, x1*2-1, x1*2-1, x1*2-1, -1,     -1,     1,      1);","pz=select(cid, -1,     -1,     1,      1,      y2*2-1, y2*2-1, y2*2-1, y2*2-1, y2*2-1, y2*2-1, y2*2-1, y2*2-1);","px=px*c1;","py=py*c1;","pz=pz*c1;","x1=px*cz+py*sz;","py=px*sz-py*cz;","y2=py*cx+pz*sx+yo;","z2=py*sx-pz*cx;","x3=x1*cy+z2*sy+xo;","z2=x1*sy-z2*cy+dt;","x1=if(above(z2,.1),1/z2,0);","x=x3*x1;","y=y2*x1*af;","x1=bnot(equal(gx,0))*x1*2;","red=x1*.5;","green=x1*2;","blue=x1*2;"].join("\n")}},{type:"Convolution",scale:8,kernel:[0,0,1,0,0,0,2,4,2,0,1,4,2,4,1,0,2,4,2,0,0,0,1,0,0]},{type:"BufferSave",action:"SAVE"}]},{type:"Invert",enabled:!0}]},
+				{name:"Silk Strings",author:"Steven Wittens / UnConeD (http://acko.net)",clearFrame:!0,components:[{type:"GlobalVar",code:{init:["n=0; /*global*/","off=.015;sweep=.75;","zm=1;zmt=1;","oxt=rand(200)*.01-1;oyt=rand(200)*.01-1;ozt=rand(200)*.01-1;","ox=oxt;oy=oyt;oz=ozt;vx=ox;vy=oy;vz=oz;","t=0;"],perFrame:["tm=gettime(0);","dec=dec*.7+(1-pow(.9,(27*(tm-lt))))*.3;","reg90=dec;","lt=tm;","zm=zm*.8+zmt*.2;","ox=ox+(oxt-ox)*dec;oy=oy+(oyt-oy)*dec;oz=oz+(ozt-oz)*dec;","ot=.1+zm*invsqrt(sqr(ox)+sqr(oy)+sqr(oz));","ox=ox*ot;oy=oy*ot;oz=oz*ot;","vx=vx+(ox-vx)*dec;vy=vy+(oy-vy)*dec;vz=vz+(oz-vz)*dec;","rz=0;","rry=atan2(-vx,vz);","rrx=-atan2(vy,sqrt(sqr(vx)+sqr(vz)));","ry=if(t,ry+sin(rry-ry)*dec,rry);rx=if(t,rx+sin(rrx-rx)*dec,rrx);","cx=cos(rx);sx=sin(rx);cy=cos(ry);sy=sin(ry);cz=cos(rz);sz=sin(rz);","reg41=off;","reg01=ry;reg02=cos(ry);reg03=sin(ry);","reg04=rx;reg05=cos(rx);reg06=sin(rx);","reg10=vx;reg11=vy;reg12=vz;","reg40=reg40+off;","reg80=reg80+(reg79-reg80)*sweep;","reg79=reg79+(reg78-reg79)*sweep;","reg78=reg78+(reg77-reg78)*sweep;","reg77=reg77+(reg76-reg77)*sweep;","reg76=reg76+(reg75-reg76)*sweep;","reg75=reg75+(reg74-reg75)*sweep;","reg74=reg74+(reg73-reg74)*sweep;","reg73=reg73+(reg72-reg73)*sweep;","reg72=reg72+(reg71-reg72)*sweep;","reg71=reg71+(reg70-reg71)*sweep;","reg70=reg70+(b*3-reg70)*sweep;","t=1;"],onBeat:["zmt=rand(100)*.01+.2;","oxt=rand(200)*.01-1;oyt=rand(200)*.01-1;ozt=rand(200)*.01-1;"]}},{type:"SuperScope",clone:18,code:{init:["n=90;","md1=rand(100)*.1;md2=rand(100)*.1;"],perFrame:["ox=reg10;oy=reg11;oz=reg12;","ry=reg01;cy=reg02;sy=reg03;","rx=reg04;cx=reg05;sx=reg06;","off=reg41;","asp=w/h;","t=reg40;","pt=t;","cx=cos(rx);sx=-sin(rx);cy=cos(ry);sy=-sin(ry);cz=cos(rz);sz=-sin(rz);","j=0;","dt=1;"],perPoint:["lj=j;","j=i*10;j=j-floor(j);j=(3-2*j)*sqr(j);","cv=if(below(i,.1),reg70+(reg71-reg70)*j,if(below(i,.2),reg71+(reg72-reg71)*j,if(below(i,.3),reg72+(reg73-reg72)*j,if(below(i,.4),reg73+(reg74-reg73)*j,if(below(i,.5),reg74+(reg75-reg74)*j,if(below(i,.6),reg75+(reg76-reg75)*j,if(below(i,.7),reg76+(reg77-reg76)*j,if(below(i,.8),reg77+(reg78-reg77)*j,if(below(i,.9),reg78+(reg79-reg78)*j,reg79+(reg80-reg79)*j)))))))));","rd=sqrt(i);","tth=sin(pt)*cos(pt*1.123+md1)+cos(pt*4.411+md2)+pt*4+sin(pt*.31);","tph=2*(cos(pt*1.66)+sin(pt*2.32+md2)*cos(pt*3.217-md1))-pt*.081-cos(pt*9.167)*cos(tth);","ss=sin(tth)*rd;","px=cos(tph)*ss;py=sin(tph)*ss;pz=cos(tth)*rd;","pt=pt-off;","px=px+ox;py=py+oy;pz=pz+oz;","x1=px*cy-pz*sy;z1=px*sy+pz*cy;","y2=py*cx-z1*sx;z2=py*sx+z1*cx;","x3=x1*cz-y2*sz;y3=x1*sz+y2*cz;","ldt=dt;","dt=if(above(z2,.01),1/z2,0);","x=if(dt,x3*dt,x);y=if(dt,y3*dt*asp,y);","cv=band(dt,ldt)*(.5+cv*5);","red=(1-sqr(i))*cv;","green=if(above(cid, 15), red, red*.5);","blue=if(above(cid, 15), red, red*.3);"]}},{type:"EffectList",input:"REPLACE",output:"ADDITIVE",components:[{type:"Convolution",scale:8,kernel:[0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0]},{type:"Convolution",scale:4,kernel:[0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,1,0,1,1,0,1,0,0,0,0,0,1,0,1,1,0,1,1,0,0,0,1,0,1,0,0,0,0,0,1,0,0,0]}]}]},
+			]
+
+			webvs_reference.loadPreset( presets[ 0 ] );
+
+			sound_reference = soundManager.createSound({
+				url: "/media/mixes/{{{name}}}.mp3",
+				useWaveformData: true,
+				useEQData: true,
+				autoLoad: true,
+				autoPlay: true
+			})
+			sound_reference.setVolume( 20 );
+
+			analyser.setSound( sound_reference );
+
+			webvs_reference.start();
+
+			setInterval( function() {
+				$( ".progress" ).progress({
+					showActivity: false,
+					percent: sound_reference.position / sound_reference.durationEstimate * 100,
+				});
+			}, 10000 );
+
+			setInterval( function() {
+				webvs_reference.loadPreset( presets[ Math.floor( Math.random() * presets.length ) ] )
+			}, ( 5 * 60 * 1000 ) )
+		}
+	});
+</script>

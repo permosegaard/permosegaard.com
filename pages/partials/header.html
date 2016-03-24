@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+    <head>
+        <title>{{title}}</title>
+
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+
+        <script src="/libs/jquery/dist/jquery.min.js"></script>
+		<script src="/libs/jquery.pulsate/jquery.pulsate.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="/libs/semantic/dist/semantic.min.css" />
+        <script src="/libs/semantic/dist/semantic.min.js"></script>
+
+        <link rel="stylesheet" type="text/css" href="/libs/lunr.js/styles.css" />
+        <script src="/libs/lunr.js/lunr.min.js"></script>
+
+        <style>
+            BODY {
+                background-color: #1B1C1D;
+                color: rgba( 255, 255, 255, 0.8 );
+            }
+
+			.menu_item {
+				color: white;
+				height: 53px;
+				margin-bottom: -14px;
+				margin-top: -14px
+				padding-bottom: 14px;
+				padding-top: 14px;
+				outline-color: rgb(255, 255, 255);
+			}
+			.menu_item:hover {
+				text-decoration: none;
+				background-color: white !important;
+				color: black !important;
+			}
+        </style>
+    </head>
+    <body>
+		<div style="margin-top: 30px; margin-left: 40px; margin-right: 40px;">
+			<div class="ui middle aligned center aligned grid">
+				<div class="row">
+					<a class="ui link column menu_item" href="/" style="background-color: #2185d0; min-width: 110px;">
+						<i class="home icon"></i>
+						Home
+					</a>
+
+					<a class="ui link column menu_item" href="/music/" style="background-color: #21ba45; min-width: 110px;">
+						<i class="sound icon"></i>
+						Music
+					</a>
+
+					<a class="ui link column menu_item" href="/code/" style="background-color: #db2828; min-width: 105px;">
+						<i class="code icon"></i>
+						Code
+					</a>
+
+					<a class="ui link column menu_item" href="/ramblings/" style="background-color: #a333c8; min-width: 145px;">
+						<i class="announcement icon"></i>
+						Ramblings
+					</a>
+
+					<a class="ui column menu_item control_header_tools" style="background-color: #a5673f; min-width: 110px;">
+						<i class="travel icon"></i>
+						Tools
+					</a>
+					<div class="ui popup transition hidden">
+						<div class="header">better, faster, stronger</div>
+						down for maintenance
+					</div>
+
+					<a class="ui link column menu_item" href="/cv/" style="background-color: #f2711c; min-width: 190px;">
+						<i class="student icon"></i>
+						Curriculum vitae
+					</a>
+
+					<div class="ui yellow link right floated column" href="#" style="min-width: 300px;">
+						<div class="ui icon input">
+							<input type="text" placeholder="Search...">
+							<i class="search icon"></i>
+						</div>
+					</div>
+
+					<a class="ui link column menu_item" href="https://duckduckgo.com" style="background-color: #2185d0; min-width: 110px;">
+						<i class="sign out icon"></i>
+						Leave
+					</a>
+				</div>
+			</div>
+
+			<br/>
