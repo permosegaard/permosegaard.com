@@ -1,9 +1,82 @@
-{{> header }}
+{{> header}}
 
-<link rel="stylesheet" href="/libs/highlightjs/styles/darkula.css">
-<script src="/libs/highlightjs/highlight.pack.min.js"></script>
-<script>hljs.initHighlightingOnLoad();</script>
+{{#if gallery}}
+	<link rel="stylesheet" href="/libs/photoswipe/dist/photoswipe.css">
+	<link rel="stylesheet" href="/libs/photoswipe/dist/default-skin/default-skin.css">
+	<script src="/libs/photoswipe/dist/photoswipe.min.js"></script>
+	<script src="/libs/photoswipe/dist/photoswipe-ui-default.min.js"></script>
+{{/if}}
 
-{{{contents}}}
+{{#if code}}
+	<link rel="stylesheet" href="/libs/highlightjs/styles/darkula.css">
+	<script src="/libs/highlightjs/highlight.pack.min.js"></script>
+	<script>hljs.initHighlightingOnLoad();</script>
+{{/if}}
 
-{{> footer }}
+{{#if gallery}}
+	<div class="ui horizontal segments">
+		{{#each gallery}}
+			<div class="ui center aligned segment">
+				<a class="ui image gallery_card" onclick="Javascript: photoswipe_by_id( {{@index}} );">
+					<img class="ui image" src="/images/{{{this.filename}}}" style="height: 150px;">
+				</a>
+				<div class="ui inverted custom popup hidden">{{{this.title}}}</div>
+			</div>
+		{{/each}}
+	</div>
+{{/if}}
+
+<div class="ui segment" style="color: black">
+	<h1 class="ui center aligned header" style="font-size: 100px;">
+		{{this.header}}
+		<div class="sub header" style="font-size: 32px;">{{this.subheader}}</div>
+	</h2>
+	<br/>
+
+	{{{contents}}}
+</div>
+
+{{#if gallery}}
+	<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+		<div class="pswp__bg"></div>
+		<div class="pswp__scroll-wrap">
+			<div class="pswp__container"><div class="pswp__item"></div><div class="pswp__item"></div> <div class="pswp__item"></div></div>
+			<div class="pswp__ui pswp__ui--hidden">
+				<div class="pswp__top-bar">
+					<div class="pswp__counter"></div>
+					<button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+					<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+					<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+					<div class="pswp__preloader"><div class="pswp__preloader__icn"><div class="pswp__preloader__cut"><div class="pswp__preloader__donut"></div></div></div></div></div>
+					<div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class="pswp__share-tooltip"></div></div>
+					<button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)"></button>
+					<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button>
+					<div class="pswp__caption">
+					<div class="pswp__caption__center"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		function photoswipe_by_id( id ) {
+			var pswpElement = document.querySelectorAll('.pswp')[ 0 ];
+			var items = [];
+			{{#each gallery}}
+				items.push({ src: "/images/{{{this.filename}}}", w: 1200, h: 900 });
+			{{/each}}
+			var gallery = new PhotoSwipe( pswpElement, PhotoSwipeUI_Default, items, { index: id } );
+			gallery.init();
+		}
+        $( document ).ready( function() {
+            $( ".gallery_card" ).popup({ inline: true, position: 'bottom center', transition: "fade down" });
+        });
+	</script>
+{{/if}}
+
+<script>
+    $( document ).ready( function() {
+        $( ".ui.accordion" ).accordion();
+    })
+</script>
+
+{{> footer}}

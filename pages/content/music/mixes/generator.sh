@@ -3,6 +3,7 @@
 if [[ ! -x "$( which ffmpeg )" ]]; then echo "install ffmpeg to continue"; exit 1; fi
 
 contents="---\n"
+contents+="title: My Mixes\n"
 contents+="layout: music/mixes/index.html\n"
 contents+="lunr: true\n"
 contents+="mixes:\n"

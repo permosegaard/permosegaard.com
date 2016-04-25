@@ -1,10 +1,13 @@
 {{> header }}
 
+<link rel="stylesheet" href="/libs/highlightjs/styles/darkula.css">
+<script src="/libs/highlightjs/highlight.pack.min.js"></script>
+
 <style>
 	.control_cookie {
 		padding: 0px !important; padding-left: 10px !important; padding-right: 20px !important;
-		position: absolute !important; left: 40px; top: 20px; min-width: 950px !important;
-		z-index: 1000;
+		position: absolute !important; left: 70px; top: 20px; min-width: 1100px !important;
+		z-index: 100000;
 	}
 </style>
 
@@ -13,16 +16,123 @@
 		<div class="row">
 			<div class="middle aligned right aligned one wide column"><i class="warning icon"></i></div>
 			<div class="middle aligned fourteen wide column">
-				Cookies are <b>not</b> in use and you will <b>not</b> be tracked anywhere on this site.<br/>
-				The full source is available on github and pull requests are always welcome, have fun!
+				Cookies and external imports are <b>only</b> used for Google Analytics, feel free to block them if you prefer.<br/>
+				The full source for this site is available on Github and pull requests are always welcome, have fun!
 			</div>
 			<div class="middle aligned left aligned one wide column"><i class="close icon"></i></div>
 		</div>
 	</div>
 </div>
 
+<div class="ui segment" style="margin-bottom: 30px; color: black;">
+	<h1><p align="center">{{welcome}}</p></h1>
+
+	<p>{{{contents}}}</p>
+
+	<br/>
+
+	<p>
+		<div class="ui list">
+			{{#each sections}}
+				{{#compare @index "!=" 0 }}<br/>{{/compare}}
+				<div class="item">
+					<i class="middle aligned big {{this.icon}} icon" style="min-width: 80px;"></i>
+					<div class="middle aligned content">
+						<div class="header">{{this.name}}</div>
+						<div class="description">{{{this.description}}}</div>
+					</div>
+				</div>
+			{{/each}}
+		</div>
+	</p>
+</div>
+
+<div class="ui segment">
+	<div class="ui blurring inverted segment">
+		<div class="ui bottom right attached label"><a class="ui link quote_link"></a></div>
+		<div class="ui active dimmer nsfw_warning">
+			<div class="content">
+				<div class="center">
+					<h3 class="ui inverted icon header">
+						<i class="warning icon"></i>
+						NSFW content ahead, do not click if you're of a nervous disposition.
+					</h3>
+					<br/><br/>
+					<a href="Javascript: $( '.nsfw_warning' ).removeClass( 'active' ); $( '.quote_content' ).css( 'min-height', '' );">
+						<button class="negative ui button">Show</button>
+					</a>
+				</div>
+			</div>
+		</div>
+		<a class="ui right corner red label" href="Javascript: bashquote();"><i class="arrow right icon"></i></a>
+		<div class="html quote_content" style="min-height: 250px;"></div>
+	</div>
+</div>
+
+<div class="ui segment">
+  <div class="ui center aligned inverted segment" style="background-color: black !important;">
+    <div class="ui bottom right attached label"><a class="ui link xkcd_link"></a></div>
+    <a class="ui right corner red label" href="Javascript: xkcd();"><i class="arrow right icon"></i></a>
+    <div class="xkcd_content" style="min-height: 250px;"></div>
+  </div>
+</div>
+
+<br/>
+
 <script>
 	$( ".control_cookie" ).on( "click", function() { $( this ).closest( ".message" ).transition( "fade" ); });
+
+  function xkcd() {
+    url = "//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=200&q=";
+    query = "http://xkcd.com/rss.xml";
+    $.ajax({
+      url: url + encodeURIComponent( query ),
+      dataType : 'jsonp',
+      success: function ( data ) {
+        articles = data[ "responseData" ][ "feed" ][ "entries" ];
+        article = articles[ Math.floor( Math.random() * articles.length ) ];
+
+        $( ".xkcd_link" ).prop( "href", article[ "link" ] );
+        $( ".xkcd_link" ).text( article[ "link" ] );
+
+        $( ".xkcd_content" ).html( article[ "content" ].replace( "http://", "//" ) );
+
+        selector = ".xkcd_content img:first-child";
+        $( selector ).css({ "filter": "invert(100%)", "-webkit-filter": "invert(100%)", "-moz-filter": "invert(100%)" });
+        $( selector ).on( "load", function() {
+            if ( $( selector ).width() > $( selector ).height() ) { $( selector ).css( "width", "80%" ); }
+            else { $( selector ).css( "width", "30%" ); }
+            $( selector ).off( "load" );
+        });
+      }
+    });
+  }
+
+	function bashquote() {
+		url = "//ajax.googleapis.com/ajax/services/feed/load?v=1.0&num=200&q=";
+		query = "http://feeds.sydv.net/top200-bash-quotes?format=xml";
+		$.ajax({
+			url: url + encodeURIComponent( query ),
+			dataType : 'jsonp',
+			success: function ( data ) {
+				articles = data[ "responseData" ][ "feed" ][ "entries" ];
+        article = articles[ Math.floor( ( Math.random() * articles.length ) ) ];
+
+        $( ".quote_link" ).prop( "href", article[ "link" ] );
+        $( ".quote_link" ).text( article[ "link" ] );
+
+				$( ".quote_content" ).html( article[ "content" ].replace( /(<img([^>]+)>)/i, "" ) );
+
+				hljs.configure({ useBR: true });
+				$( ".quote_content" ).each( function( index, block ) { hljs.highlightBlock( block ); });
+			}
+		});
+	}
+
+ $( document ).ready( function() {
+     xkcd();
+     bashquote();
+	});
 </script>
 
 {{> footer }}

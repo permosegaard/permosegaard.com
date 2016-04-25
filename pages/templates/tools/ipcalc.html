@@ -1,0 +1,165 @@
+{{> header}}
+
+<script src="/libs/ip-subnet-calculator/lib/ip-subnet-calculator.js"></script>
+
+<div class="ui segment" style="color: black;">
+	{{{contents}}}
+
+	<div class="ui basic segment">
+		<div class="ui center aligned inverted segment">
+			<form class="ui form" onsubmit="Javascript: return optimiser();">
+				<div class="field">
+					<label style="color: white;">Netmask Optimiser</label>
+					<input type="text" id="optimiser-start-ip" placeholder="Start IP Address">
+					<input type="text" id="optimiser-end-ip" placeholder="End IP Address">
+				</div>
+				<button class="ui button" type="submit">Optimise</button>
+			</form>
+		</div>
+		<div class="ui center aligned inverted segment">
+			<form class="ui form" onsubmit="Javascript: return calculate_mask();">
+				<div class="field">
+					<label style="color: white;">Subnet Mask from Prefix</label>
+					<input type="text" id="calculate-mask-ip" placeholder="IP Address">
+					<input type="text" id="calculate-mask-prefix" placeholder="CIDR Prefix (without '/')">
+				</div>
+				<button class="ui button" type="submit">Calculate</button>
+			</form>
+		</div>
+		<div class="ui center aligned inverted segment">
+			<form class="ui form" onsubmit="Javascript: return calculate_cidr();">
+				<div class="field">
+					<label style="color: white;">CIDR from Subnet Mask</label>
+					<input type="text" id="calculate-cidr-ip" placeholder="IP Address">
+					<input type="text" id="calculate-cidr-mask" placeholder="Subnet Mask">
+				</div>
+				<button class="ui button" type="submit">Calculate</button>
+			</form>
+		</div>
+		<div class="ui center aligned inverted segment">
+			<form class="ui form" onsubmit="Javascript: return ip_to_decimal();">
+				<div class="field">
+					<label style="color: white;">IP Address to Decimal</label>
+					<input type="text" id="ip-to-decimal" placeholder="IP Address">
+				</div>
+				<button class="ui button" type="submit">Calculate</button>
+			</form>
+		</div>
+		<div class="ui center aligned inverted segment">
+			<form class="ui form" onsubmit="Javascript: return decimal_to_ip();">
+				<div class="field">
+					<label style="color: white;">Decimal to IP Address</label>
+					<input type="text" id="decimal-to-ip" placeholder="IP Address">
+				</div>
+				<button class="ui button" type="submit">Calculate</button>
+			</form>
+		</div>
+	</div>
+	<div class="ui inverted segment">
+		<table class="ui celled padded center aligned table">
+			<thead>
+				<tr>
+					<th>Subnet Mask</th>
+					<th>Binary Mask</th>
+					<th>CIDR</th>
+					<th>Usable Addresses</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each subnets}}
+					<tr>
+						{{#each this}}
+							<td>{{this}}</td>
+						{{/each}}
+					</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+	<div class="ui inverted segment">
+		<table class="ui celled padded center aligned table">
+			<thead>
+				<tr>
+					<th>Addresses</th>
+					<th>Notes</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each reserved}}
+					<tr>
+						{{#each this}}
+							<td>{{this}}</td>
+						{{/each}}
+					</tr>
+				{{/each}}
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="ui page dimmer result_dimmer">
+	<div class="content">
+		<div class="center">
+			<p align="center" class="results_control"></p>
+			<br/>
+			<button class="ui active button" onclick="Javascript: $( '.result_dimmer' ).dimmer( 'hide' );">Close</button>
+		</div>
+	</div>
+</div>
+
+</div>
+
+<script>
+	function show_results( header, body ) {
+		table_header_row_element = $( "<tr></tr>" );
+		$.each( header, function( index, value ) {
+			table_header_row_element.append( $( "<td></td>", { text: value } ) )
+		});
+		table_header_element =  $( "<thead></thead>" );
+		table_header_element.append( table_header_row_element );
+		table_body_element =  $( "<tbody></tbody>" );
+		$.each( body, function( index, value ) {
+			table_body_row_element = $( "<tr></tr>" );
+			$.each( value, function( inner_index, inner_value ) {
+				table_body_row_element.append( $( "<td></td>", { text: inner_value } ) )
+			});
+			table_body_element.append( table_body_row_element );
+		});
+		table_element = $( "<table></table>", { "class": "ui celled padded center aligned table", "style": "max-width: 600px;" } );
+		table_element.append( table_header_element );
+		table_element.append( table_body_element );
+		$( ".results_control" ).empty();
+		$( ".results_control" ).append( table_element );
+		$( ".result_dimmer" ).dimmer( "show" );
+		return false; // cancel event bubbling
+	}
+
+	function optimiser() {
+		results = IpSubnetCalculator.calculate( $( "#optimiser-start-ip" ).val(), $( "#optimiser-end-ip" ).val() );
+		filtered_results = [];
+		$.each( results, function( index, value ) {
+			filtered_results.push( [ value[ "ipLowStr" ], value[ "ipHighStr" ], value[ "prefixMaskStr" ] ] );
+		});
+		return show_results( [ "Start IP", "End IP", "Subnet Mask" ], filtered_results );
+	}
+	
+	function calculate_mask() {
+		results = IpSubnetCalculator.calculateSubnetMask( $( "#calculate-mask-ip" ).val(), $( "#calculate-mask-prefix" ).val() );
+		return show_results( [ "Subnet Mask" ], [ [ results[ "prefixMaskStr" ] ] ] );
+	}
+	
+	function calculate_cidr() {
+		results = IpSubnetCalculator.calculateCIDRPrefix( $( "#calculate-cidr-ip" ).val(), $( "#calculate-cidr-mask" ).val() );
+		return show_results( [ "CIDR" ], [ [ results[ "prefixSize" ] ] ] );
+	}
+
+	function ip_to_decimal() {
+		return show_results( [ "Decimal" ], [ [ IpSubnetCalculator.toDecimal( $( "#ip-to-decimal" ).val() ) ] ] )
+	}
+	
+	function decimal_to_ip() {
+		return show_results( [ "IP Address" ], [ [ IpSubnetCalculator.toString( $( "#decimal-to-ip" ).val() ) ] ] );
+	}
+</script>
+
+{{> footer}}

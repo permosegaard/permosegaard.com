@@ -1,4 +1,5 @@
 ---
+title: My Mixes
 layout: music/mixes/index.html
 lunr: true
 mixes:

@@ -1,5 +1,5 @@
 ---
-title: trader title test
+title: Trader
 layout: code/trader.html
 lunr: false
 ---

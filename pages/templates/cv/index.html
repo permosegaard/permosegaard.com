@@ -1,0 +1,225 @@
+{{> header}}
+
+<style>
+	@media all {
+		.page1, .page2 { height: 24.89cm; }
+	}
+
+	@media all and ( max-width: 1499px ) {
+		.page1, .page2 { max-width: 705px; }
+		.page2, .page3 { page-break-before: always; }
+		.page3 { max-width: 1100px; }
+		.page1, .page2, .page3 { margin-left: auto !important; margin-right: auto !important; }
+	}
+
+	@media all and ( min-width: 1500px ) {
+		.page1, .page2 { width: 50%; max-width: 705px; z-index: 1000; }
+		.page3 { max-width: 1410px; float: none; clear: both; }
+		.page1 { position: absolute !important; right: 50%; }
+		.page2 { position: absolute !important; left: 50%; }
+		.page3 { margin-top: 25.89cm !important; margin-left: auto !important; margin-right: auto !important; }
+	}
+
+	@media screen {
+		.bigname {
+			text-shadow: 4px 3px 0px #fff, 9px 8px 0px rgba(0,0,0,0.15);
+			font-size: 6.5rem !important;
+		}
+	}
+
+	@media print {
+    BODY { background-color: white; padding: 0px !important; margin: 0px !important; }
+		.bigname {
+			-webkit-filter: drop-shadow(4px 3px 0px #fff) drop-shadow(4px 3px 0px rgba(0,0,0,0.15));
+			font-size: 6rem !important;
+		}
+        .page3, .download-pdf { display: none; }
+	}
+</style>
+
+<div class="download-pdf" style="max-width: 40%; margin-left: 30%; margin-right: 30%;">
+    <br/>
+    <button class="fluid ui button download-pdf-button">Download this Curriculum Vitae as a PDF</button>
+    <div class="ui flowing inverted popup transition hidden" style="max-width: 500px;">
+        <p>Please be aware that the PDF is generated manually using the browser print function to be as close to this page as possible.
+            It does NOT include the skills table below and may not be completely up to date. Please use this page where possible however if you
+            would still like to download click continue to download the PDF.</p><br/>
+        <p align="center"><a class="ui primary button" href="/media/Curriculum Vitae.pdf" download>Continue to Download</a></p>
+    </div>
+</div>
+
+<div class="ui segment page1 no-print-border">
+	<h1 class="ui center aligned header bigname" style="margin-bottom: 0;">
+		Per Mosegaard
+	</h1>
+	<h3 class="ui center aligned header" style="margin-top: 0;">
+		Email: permosegaard@googlemail.com | Skype: per.mosegaard<br/>
+		Complete version available at http://permosegaard.com/cv/
+	</h3>
+
+	<h4 class="ui top attached inverted purple header" style="border-left: 3px solid purple; margin-top: 5px;">
+		<i class="user icon"></i>
+		<div class="content">
+			Personal Statement
+		</div>
+	</h4>
+	<div class="ui bottom attached horizontal segments" style="color: black; border-top: 0; border-top-right-radius: 0; margin-top: 0; margin-left: -2px; margin-right: -1px;">
+    <div class="ui segment" style="width: 60%; border-left: 3px solid purple; padding: 5px">
+			<p style="font-size: 14px; font-weight: normal;">
+				{{{statement}}}
+			</p>
+		</div>
+    <div class="ui segment" style="width: 40%; border-left: 3px solid purple; padding: 5px;">
+			<div class="ui list">
+				{{#each this.bullets}}
+					<div class="item" style="padding-top: 0; padding-bottom: 0; font-size: 14px; font-weight: normal;">
+						• {{{this}}}
+					</div>
+				{{/each}}
+			</div>
+		</div>
+	</div>
+
+	<div class="ui segments" style="color: black;">
+		{{#each experience}}
+			{{#compare @index "==" 0}}
+				<h4 class="ui top attached inverted green header" style="border-left: 3px solid green; border-top: 0;">
+					<i class="sitemap icon"></i>
+					<div class="content">
+						{{{this.position}}} <span style="font-weight: lighter; color: white;"><i>at</i></span> {{{this.company}}}
+						<div class="sub header">{{{this.period}}}</div>
+					</div>
+				</h4>
+				<div class="ui bottom attached segment" style="border-left: 3px solid green; border-bottom: 0; padding: 10px;">
+					<p style="font-size: 14px; margin-bottom: 5px;">{{{description}}}</p>
+					<div class="ui horizontal list" style="text-align: center; margin: 0; line-height: 18px;">
+						{{#each this.bullets}}
+							<div class="item" style="padding-top: 0; padding-bottom: 0; font-size: 14px; font-weight: normal;">
+								• {{{this}}}
+							</div>
+						{{/each}}
+					</div>
+				</div>
+			{{/compare}}
+		{{/each}}
+	</div>
+</div>
+
+<div class="ui segment page2 no-print-border">
+	<div class="ui segments" style="color: black;">
+		{{#each experience}}
+			{{#compare @index "!=" 0}}
+				<h4 class="ui attached inverted green header" style="border-left: 3px solid green; border-top: 0; border-bottom: 0;">
+					<i class="sitemap icon"></i>
+					<div class="content">
+						{{{this.position}}} <span style="font-weight: lighter; color: white;"><i>at</i></span> {{{this.company}}}
+						<div class="sub header">{{{this.period}}}</div>
+					</div>
+				</h4>
+				<div class="ui attached segment" style="border-left: 3px solid green; border-top: 0; border-bottom: 0; padding: 5px;">
+					<p style="font-size: 14px; margin-bottom: 5px;">{{{description}}}</p>
+					<div class="ui list" style="text-align: center; margin: 0;">
+						{{#each this.bullets}}
+							<div class="item" style="padding-top: 0; padding-bottom: 0; font-size: 14px; font-weight: normal;">
+								• {{{this}}}
+							</div>
+						{{/each}}
+					</div>
+				</div>
+			{{/compare}}
+		{{/each}}
+	</div>
+
+	<div class="ui segments" style="color: black;">
+		{{#each education}}
+			<h4 class="ui attached inverted red header" style="border-left: 3px solid red; border-top: 0; border-bottom: 0;">
+				<i class="student icon"></i>
+				<div class="content">
+					{{{this.where}}}
+					<div class="sub header">{{{this.when}}}</div>
+				</div>
+			</h4>
+			<div class="ui attached segment" style="border-left: 3px solid red; border-top: 0; padding: 5px;">
+				<div class="ui list" style="font-size: 14px; font-weight: normal;">
+					{{#each this.what}}
+						<div class="item">
+							• {{{this}}}
+						</div>
+					{{/each}}
+				</div>
+			</div>
+		{{/each}}
+	</div>
+
+	<h4 class="ui top attached inverted blue header" style="border-left: 3px solid blue; margin-top: 0;">
+		<i class="world icon"></i>
+		<div class="content">
+			Personal Interests
+		</div>
+	</h4>
+	<div class="ui bottom attached segment" style="color: black; border-left: 3px solid blue; padding: 10px;">
+		<div class="ui list">
+			{{#each extra}}
+				<div class="item" style="font-size: 14px;">
+					• {{{this}}}
+				</div>
+			{{/each}}
+		</div>
+	</div>
+</div>
+
+<div class="ui segment page3 no-print-border">
+	<table class="ui inverted celled definition table">
+		<thead>
+			<tr align="center">
+				<th colspan="4"></th>
+				<th colspan="3">Commercial</th>
+				<th style="background-color: white !important;"></th>
+			</tr>
+			<tr align="center">
+				<th></th>
+				<th>Technology</th>
+        <th class="th_popup" data-content="Years of active use as a rough estimate"><i class="info circle small icon"></i> Experience</th>
+        <th class="th_popup" data-content="Largest project I've worked on using this technology"><i class="info circle small icon"></i> Largest</th>
+        <th class="th_popup" data-content="Whether I've used this technology in a commerical setting"><i class="info circle small icon"></i> Used In</th>
+        <th class="th_popup" data-content="Have my skills been contracted to external companies"><i class="info circle small icon"></i> Contracted</th>
+        <th class="th_popup" data-content="Have I assisted or trained collegues with this technology"><i class="info circle small icon"></i> Escalated</th>
+        <th class="th_popup" data-content="Fuzzy 'enjoyment' I typically get using this technology in a professional setting"><i class="info circle small icon"></i> Preference</th>
+			</tr>
+		</thead>
+
+		{{#each tabled}}
+			<tbody>
+				{{#each this.data}}
+					<tr align="center">
+						{{#compare @index "==" 0}}
+							<td rowspan="{{../this.data.length}}" style="padding: 0; max-width: 50px; transform: rotate( -90deg ); background-color: transparent;">{{../this.name}}</td>
+                        {{/compare}}
+
+						<td style="font-weight: normal;">{{this.name}}</td>
+						<td>{{this.years}}</td>
+						<td>{{this.size}}</td>
+						<td>{{{tick_or_cross this.commercial}}}</td>
+						<td>{{{tick_or_cross this.contracted}}}</td>
+						<td>{{{tick_or_cross this.escalation}}}</td>
+                        <td class="td_popup" data-content="{{{smiley_description this.preference}}}">{{{smiley this.preference}}}</td>
+					</tr>
+				{{/each}}
+			</tbody>
+
+			{{#compare @index "==" 0}}
+				<tbody style="background-color: white;"><tr><td colspan="8" style="padding: 0px; line-height: 20px;">&nbsp;</td></tr>
+			{{/compare}}
+		{{/each}}
+	</table>
+</div>
+
+<br/>
+
+<script>
+    $( ".download-pdf-button" ).popup({ on: "click", inline: true, hoverable: true, position: "bottom center" });
+    $( ".th_popup" ).popup({ position: "bottom center" })
+    $( ".td_popup" ).popup({ position: "bottom center" })
+</script>
+
+{{> footer}}

@@ -1,0 +1,70 @@
+{{> header}}
+
+<script src="/libs/fingerprintjs2/dist/fingerprint2.min.js"></script>
+<script src="/libs/clientjs/dist/client.min.js"></script>
+
+<div class="ui segment" style="color: black;">
+	{{{contents}}}
+
+	<div class="ui inverted segment">
+		<p align="center" class="ip_control"></p>
+	</div>
+
+	<div class="ui inverted segment">
+		<p align="center" class="fingerprint_control"></p>
+	</div>
+
+	<div class="ui inverted segment">
+		<table class="ui center aligned celled table">
+			<tbody class="elements_control">
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<script>
+	$( document ).ready( function() {
+		$.ajax({
+			url: "//icanhazip.com",
+			dataType: "text",
+			success: function( data ) { $( ".ip_control" ).text( "IP Address: " + data ); }
+		});
+
+		new Fingerprint2().get( function( result, components ) { $( ".fingerprint_control" ).text( "Browser Fingerprint: " + result ); } );
+
+		var client = new ClientJS();
+		elements = {
+			"User Agent": client.getUserAgent(),
+			"Browser": client.getBrowser(),
+			"Browser Version": client.getBrowserVersion(),
+			"Browser Engine": client.getEngine(),
+			"Browser Engine Version": client.getEngineVersion(),
+			"Browser Mobile Version": client.isMobile(),
+			"Browser MIME Types": client.getMimeTypes(),
+			"Browser Plugins": client.getPlugins(),
+			"Browser Java Version": client.getJavaVersion(),
+			"Browser Flash Version": client.getFlashVersion(),
+			"Browser Local Storage": client.isLocalStorage(),
+			"Browser Session Storage": client.isSessionStorage(),
+			"Browser Cookie Storage": client.isCookie(),
+			"Browser Canvas Available": client.isCanvas(),
+			"Operating System": client.getOS(),
+			"Operating System Version": client.getOSVersion(),
+			"Device": client.getDevice(),
+			"Device Type": client.getDeviceType(),
+			"Device Vendor": client.getDeviceVendor(),
+			"CPU": client.getCPU(),
+			"Screen": client.getScreenPrint(),
+			"Timezone": client.getTimeZone(),
+			"Language": client.getLanguage()
+		};
+		$.each( elements, function( key, value ) {
+			table_row = $( "<tr></tr>" );
+			table_row.append( $( "<td></td>", { text: key } ) );
+			table_row.append( $( "<td></td>", { text: value } ) );
+			$( ".elements_control" ).append( table_row );
+		});
+	});
+</script>
+
+{{> footer}}

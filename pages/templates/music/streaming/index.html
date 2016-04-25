@@ -1,0 +1,55 @@
+{{> header }}
+
+<br/><br/>
+
+<div class="ui grid">
+	<div class="column">&nbsp;</div>
+	<div class="fourteen wide green column" style="padding: 0px;">
+		<div class="ui vertically divided items" style="min-width: 600px; left: 100%; right: 100%;">
+
+            {{#each streams}}
+			<div class="item item_hover" style="padding: 30px !important;">
+				<div class="icon" style="padding-right: 20px;">
+                    <i class="huge feed black icon" style="position: relative; top: 10px;"></i>
+				</div>
+				<div class="middle aligned content" style="color: white !important; background-color: #1B1C1D; padding: 20px;">
+					<div class="header" style="color: inherit;">{{{this.name}}}</div>
+					<div class="description" style="color: inherit; ">{{{this.description}}}</div>
+				</div>
+				<div class="content" style="max-width: 150px; padding-left: 20px;">
+					<div class="description">&nbsp;</div>
+					<div class="extra">
+                        <a href="/music/streaming/{{this.url}}.html">
+							<div class="ui black button button_hover" style="position: relative; top: -10px;">
+							  Continue
+							  <i class="right chevron icon"></i>
+							</div>
+						</a>
+					</div>
+				</div>
+			</div>
+			{{/each}}
+
+		</div>
+	</div>
+	<div class="column">&nbsp;</div>
+</div>
+
+<script>
+	$( ".button_hover" ).mouseenter(
+		function()  {
+//			hover_pulse( $( this ), "rgba( 0, 0, 0, 255 )", 5, 600 );
+			$( this ).css( "background-color", "#21BA45" );
+		}
+	)
+	$( ".button_hover" ).mouseleave(
+		function()  {
+//			$( this ).pulsate( "destroy" );
+			$( this ).css( "background-color", "black" );
+		}
+	)
+</script>
+
+<br/><br/>
+
+{{> footer }}

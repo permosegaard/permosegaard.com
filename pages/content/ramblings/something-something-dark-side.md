@@ -5,6 +5,7 @@ date: 1/1/70
 icon: keyboard
 layout: ramblings/post.html
 lunr: true
+draft: true
 ---
 content here
 

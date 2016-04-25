@@ -1,5 +1,10 @@
 # TODO: redirect to man page a like for links/curl/etc.
 
+#Authtype Basic
+#AuthName "Restricted"
+#AuthUserFile /replicated/permosegaard.com/.htpasswd
+#Require valid-user
+
 RewriteEngine on
 
 DirectoryIndex disabled
